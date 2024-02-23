@@ -5,16 +5,26 @@ import 'dart:html' as html;
 
 import '../value.dart';
 
+/// A class for managing data storage using local storage mechanisms,
+/// such as HTML5 local storage.
 class VaultifyImpl {
+  /// Constructs a [VaultifyImpl] instance with the given [fileName] and optional [path].
   VaultifyImpl(this.fileName, [this.path]);
+
+  /// Gets the local storage instance.
   html.Storage get localStorage => html.window.localStorage;
 
+  /// The optional path for storing the file.
   final String? path;
+
+  /// The name of the file.
   final String fileName;
 
+  /// The storage subject holding the data.
   ValueStorage<Map<String, dynamic>> subject =
       ValueStorage<Map<String, dynamic>>(<String, dynamic>{});
 
+  /// Clears the stored data.
   void clear() {
     localStorage.remove(fileName);
     subject.value.clear();
@@ -24,26 +34,32 @@ class VaultifyImpl {
       ..changeValue("", null);
   }
 
+  /// Checks if the file exists in the storage.
   Future<bool> _exists() async {
     return localStorage.containsKey(fileName);
   }
 
+  /// Flushes the data to storage.
   Future<void> flush() async {
     return await _writeToStorage(subject.value);
   }
 
+  /// Reads a value associated with the given [key] from storage.
   T? read<T>(String key) {
     return subject.value[key] as T?;
   }
 
+  /// Retrieves the keys from the stored data.
   T getKeys<T>() {
     return subject.value.keys as T;
   }
 
+  /// Retrieves the values from the stored data.
   T getValues<T>() {
     return subject.value.values as T;
   }
 
+  /// Initializes the storage with optional [initialData].
   Future<void> init([Map<String, dynamic>? initialData]) async {
     subject.value = initialData ?? <String, dynamic>{};
     if (await _exists()) {
@@ -54,29 +70,27 @@ class VaultifyImpl {
     return;
   }
 
+  /// Removes the value associated with the given [key] from storage.
   void remove(String key) {
     subject
       ..value.remove(key)
       ..changeValue(key, null);
-    //  return _writeToStorage(subject.value);
   }
 
+  /// Writes the given [value] associated with the [key] to storage.
   void write(String key, dynamic value) {
     subject
       ..value[key] = value
       ..changeValue(key, value);
-    //return _writeToStorage(subject.value);
   }
 
-  // void writeInMemory(String key, dynamic value) {
-
-  // }
-
+  /// Writes the data to the storage.
   Future<void> _writeToStorage(Map<String, dynamic> data) async {
     localStorage.update(fileName, (val) => json.encode(subject.value),
         ifAbsent: () => json.encode(subject.value));
   }
 
+  /// Reads the data from storage.
   Future<void> _readFromStorage() async {
     final dataFromLocal = localStorage.entries.firstWhereOrNull(
       (value) {
@@ -91,7 +105,19 @@ class VaultifyImpl {
   }
 }
 
+/// Extension method on Iterable<T> to provide a similar functionality to
+/// [Iterable.firstWhere], but returns null if no element satisfies the
+/// condition.
 extension FirstWhereExt<T> on Iterable<T> {
+  /// Returns the first element that satisfies the given predicate [test],
+  /// or null if there are no elements that satisfy the predicate.
+  ///
+  /// Example:
+  /// ```dart
+  /// final numbers = [1, 2, 3, 4, 5];
+  /// final firstEven = numbers.firstWhereOrNull((element) => element.isEven);
+  /// print(firstEven); // Output: 2
+  /// ```
   T? firstWhereOrNull(bool Function(T element) test) {
     for (var element in this) {
       if (test(element)) return element;

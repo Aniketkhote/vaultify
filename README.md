@@ -1,14 +1,17 @@
 # Vaultify
 
-Vaultify is a secure and efficient local storage solution for Flutter applications. It provides seamless data persistence with encryption support, ensuring the confidentiality and integrity of stored data.
+# Vaultify
+
+Vaultify is a versatile local storage solution designed for Flutter applications, providing efficient data persistence and seamless integration.
 
 ## Features
 
-- **Secure Storage**: Vaultify encrypts stored data to ensure confidentiality and protect against unauthorized access.
-- **Efficient Performance**: Optimized read and write operations for fast and reliable data storage.
-- **Customizable**: Easily customize storage directory and encryption settings to fit your application's requirements.
-- **Structured Data Support**: Store and retrieve complex data structures with ease.
-- **Comprehensive Documentation**: Well-documented APIs with examples and usage guidelines for easy integration.
+- **Efficient Storage**: Vaultify ensures fast and reliable data storage with optimized read and write operations.
+- **Customizable**: Tailor Vaultify to your application's needs by easily configuring storage directory and settings.
+- **Structured Data Support**: Seamlessly manage complex data structures for versatile storage solutions.
+- **Comprehensive Documentation**: Explore well-documented APIs, complete with examples and usage guidelines for effortless integration.
+
+Vaultify simplifies local data storage, empowering Flutter developers to build robust applications with ease.
 
 ## Getting Started
 
@@ -33,11 +36,14 @@ void main() async {
   // Initialize Vaultify
   await Vaultify.init();
 
+ // Create Object
+  final vault = Vaultify();
+
   // Store data
-  await Vaultify.write(key: 'username', value: 'john_doe');
+  await vault.write(key: 'username', value: 'john_doe');
 
   // Read data
-  String username = await Vaultify.read(key: 'username');
+  String username = await vault.read(key: 'username');
   print('Username: $username');
 }
 ```

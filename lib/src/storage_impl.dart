@@ -6,8 +6,13 @@ import 'package:refreshed/utils.dart';
 import 'storage/html.dart' if (dart.library.io) 'storage/io.dart';
 import 'value.dart';
 
-/// Instantiate Vaultify to access storage driver apis
+/// Instantiates Vaultify to access storage driver APIs.
 class Vaultify {
+  /// Creates a new Vaultify instance.
+  ///
+  /// [container] is the container name, defaults to 'Vaultify'.
+  /// [path] is the optional path.
+  /// [initialData] is the initial data to be used.
   factory Vaultify(
       [String container = 'Vaultify',
       String? path,
@@ -21,6 +26,7 @@ class Vaultify {
     }
   }
 
+  /// Constructs a Vaultify instance.
   Vaultify._internal(String key,
       [String? path, Map<String, dynamic>? initialData]) {
     _concrete = VaultifyImpl(key, path);
@@ -32,16 +38,21 @@ class Vaultify {
     });
   }
 
+  /// Map to store synchronized instances of Vaultify.
   static final Map<String, Vaultify> _sync = {};
 
+  /// Microtask instance.
   final microtask = Microtask();
 
-  /// Start the storage drive. It's important to use await before calling this API, or side effects will occur.
+  /// Initializes the storage drive.
+  ///
+  /// [container] is the container name.
   static Future<bool> init([String container = 'Vaultify']) {
     WidgetsFlutterBinding.ensureInitialized();
     return Vaultify(container).initStorage;
   }
 
+  /// Initializes the Vaultify instance.
   Future<void> _init() async {
     try {
       await _concrete.init(_initialData);
@@ -50,33 +61,40 @@ class Vaultify {
     }
   }
 
-  /// Reads a value in your container with the given key.
+  /// Reads a value from the container with the given [key].
   T? read<T>(String key) {
     return _concrete.read(key);
   }
 
+  /// Retrieves the keys from the container.
   T getKeys<T>() {
     return _concrete.getKeys();
   }
 
+  /// Retrieves the values from the container.
   T getValues<T>() {
     return _concrete.getValues();
   }
 
-  /// return data true if value is different of null;
+  /// Checks if data exists in the container for the given [key].
+  ///
+  /// Returns true if data exists, otherwise false.
   bool hasData(String key) {
     return (read(key) == null ? false : true);
   }
 
+  /// Gets the changes made to the container.
   Map<String, dynamic> get changes => _concrete.subject.changes;
 
-  /// Listen changes in your container
+  /// Listens for changes in the container.
   VoidCallback listen(VoidCallback value) {
     return _concrete.subject.addListener(value);
   }
 
+  /// Map to store key listeners.
   final Map<Function, Function> _keyListeners = <Function, Function>{};
 
+  /// Listens for changes to a specific [key].
   VoidCallback listenKey(String key, ValueSetter callback) {
     listen() {
       if (changes.keys.first == key) {
@@ -88,59 +106,51 @@ class Vaultify {
     return _concrete.subject.addListener(listen);
   }
 
-  // /// Remove listen of your container
-  // void removeKeyListen(Function(Map<String, dynamic>) callback) {
-  //   _concrete.subject.removeListener(_keyListeners[callback]);
-  // }
-
-  // /// Remove listen of your container
-  // void removeListen(void Function() listener) {
-  //   _concrete.subject.removeListener(listener);
-  // }
-
-  /// Write data on your container
+  /// Writes data to the container with the specified [key].
   Future<void> write(String key, dynamic value) async {
     writeInMemory(key, value);
-    // final _encoded = json.encode(value);
-    // await _concrete.write(key, json.decode(_encoded));
-
     return await _tryFlush();
   }
 
+  /// Writes data to the container in memory.
   void writeInMemory(String key, dynamic value) {
     _concrete.write(key, value);
   }
 
-  /// Write data on your only if data is null
+  /// Writes data to the container only if the data is null.
   Future<void> writeIfNull(String key, dynamic value) async {
     if (read(key) != null) return;
     return await write(key, value);
   }
 
-  /// remove data from container by key
+  /// Removes data from the container with the specified [key].
   Future<void> remove(String key) async {
     _concrete.remove(key);
     return await _tryFlush();
   }
 
-  /// clear all data on your container
+  /// Clears all data from the container.
   Future<void> erase() async {
     _concrete.clear();
     return await _tryFlush();
   }
 
+  /// Saves the changes made to the container.
   Future<void> save() async {
     return await _tryFlush();
   }
 
+  /// Tries to flush the changes to the container.
   Future<void> _tryFlush() async {
     return microtask.exec(_addToQueue);
   }
 
+  /// Adds the flush operation to the queue.
   Future _addToQueue() async {
     return await queue.add(_flush);
   }
 
+  /// Flushes the changes to the container.
   Future<void> _flush() async {
     try {
       await _concrete.flush();
@@ -150,23 +160,35 @@ class Vaultify {
     return;
   }
 
+  /// Instance of VaultifyImpl.
   late VaultifyImpl _concrete;
 
+  /// GetQueue instance.
   GetQueue queue = GetQueue();
 
-  /// listenable of container
+  /// Listenable of the container.
   ValueStorage<Map<String, dynamic>> get listenable => _concrete.subject;
 
-  /// Start the storage drive. Important: use await before calling this api, or side effects will happen.
+  /// Initializes the storage drive.
+  ///
+  /// Important: use await before calling this API, or side effects will occur.
   late Future<bool> initStorage;
 
+  /// Initial data for the container.
   Map<String, dynamic>? _initialData;
 }
 
+/// A class for managing microtasks and ensuring that a callback is executed
+/// only once per microtask.
 class Microtask {
   int _version = 0;
   int _microtask = 0;
 
+  /// Executes the provided [callback] function.
+  ///
+  /// The [callback] function is executed only once per microtask.
+  /// If multiple calls to [exec] are made within the same microtask,
+  /// only the last call will trigger the [callback].
   void exec(Function callback) {
     if (_microtask == _version) {
       _microtask++;
