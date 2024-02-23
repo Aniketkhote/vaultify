@@ -6,10 +6,10 @@ import 'package:refreshed/utils.dart';
 import 'storage/html.dart' if (dart.library.io) 'storage/io.dart';
 import 'value.dart';
 
-/// Instantiate GetStorage to access storage driver apis
+/// Instantiate Vaultify to access storage driver apis
 class Vaultify {
   factory Vaultify(
-      [String container = 'GetStorage',
+      [String container = 'Vaultify',
       String? path,
       Map<String, dynamic>? initialData]) {
     if (_sync.containsKey(container)) {
@@ -37,7 +37,7 @@ class Vaultify {
   final microtask = Microtask();
 
   /// Start the storage drive. It's important to use await before calling this API, or side effects will occur.
-  static Future<bool> init([String container = 'GetStorage']) {
+  static Future<bool> init([String container = 'Vaultify']) {
     WidgetsFlutterBinding.ensureInitialized();
     return Vaultify(container).initStorage;
   }
@@ -104,7 +104,7 @@ class Vaultify {
     // final _encoded = json.encode(value);
     // await _concrete.write(key, json.decode(_encoded));
 
-    return _tryFlush();
+    return await _tryFlush();
   }
 
   void writeInMemory(String key, dynamic value) {
@@ -114,31 +114,31 @@ class Vaultify {
   /// Write data on your only if data is null
   Future<void> writeIfNull(String key, dynamic value) async {
     if (read(key) != null) return;
-    return write(key, value);
+    return await write(key, value);
   }
 
   /// remove data from container by key
   Future<void> remove(String key) async {
     _concrete.remove(key);
-    return _tryFlush();
+    return await _tryFlush();
   }
 
   /// clear all data on your container
   Future<void> erase() async {
     _concrete.clear();
-    return _tryFlush();
+    return await _tryFlush();
   }
 
   Future<void> save() async {
-    return _tryFlush();
+    return await _tryFlush();
   }
 
   Future<void> _tryFlush() async {
     return microtask.exec(_addToQueue);
   }
 
-  Future _addToQueue() {
-    return queue.add(_flush);
+  Future _addToQueue() async {
+    return await queue.add(_flush);
   }
 
   Future<void> _flush() async {
@@ -178,5 +178,3 @@ class Microtask {
     }
   }
 }
-
-typedef KeyCallback = Function(String);

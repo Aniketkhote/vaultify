@@ -1,7 +1,7 @@
 name: vaultify
-description: "A new Flutter package project."
+description: "A secure and efficient local storage solution for Flutter applications."
 version: 1.0.0
-homepage: null
+repository: "https://github.com/Aniketkhote/vaultify"
 
 environment:
   sdk: ">=3.2.6 <4.0.0"

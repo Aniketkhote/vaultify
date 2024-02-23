@@ -46,7 +46,7 @@ class VaultifyImpl {
 
   void _madeBackup() {
     _getFile(true).then(
-      (value) => value.writeAsString(
+      (value) async => await value.writeAsString(
         json.encode(subject.value),
         flush: true,
       ),
@@ -137,7 +137,7 @@ class VaultifyImpl {
 
   Future<Directory> _getImplicitDir() async {
     try {
-      return getApplicationDocumentsDirectory();
+      return await getApplicationDocumentsDirectory();
     } catch (err) {
       rethrow;
     }

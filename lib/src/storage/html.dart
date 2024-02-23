@@ -28,8 +28,8 @@ class VaultifyImpl {
     return localStorage.containsKey(fileName);
   }
 
-  Future<void> flush() {
-    return _writeToStorage(subject.value);
+  Future<void> flush() async {
+    return await _writeToStorage(subject.value);
   }
 
   T? read<T>(String key) {

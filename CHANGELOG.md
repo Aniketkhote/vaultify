@@ -1,3 +1,3 @@
-## 0.0.1
+## 1.0.0
 
-* TODO: Describe initial release.
+- Introduces secure and efficient local storage capabilities for Flutter applications.
