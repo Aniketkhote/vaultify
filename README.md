@@ -1,7 +1,5 @@
 # Vaultify
 
-# Vaultify
-
 Vaultify is a versatile local storage solution designed for Flutter applications, providing efficient data persistence and seamless integration.
 
 ## Features
