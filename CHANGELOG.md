@@ -1,3 +1,7 @@
+## 1.0.2
+
+- Fixed pub points.
+
 ## 1.0.1
 
 - Minor fixes and added documentation comments for improved code clarity and understanding.

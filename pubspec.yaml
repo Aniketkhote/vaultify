@@ -1,6 +1,6 @@
 name: vaultify
 description: "A secure and efficient local storage solution for Flutter applications."
-version: 1.0.1
+version: 1.0.2
 repository: "https://github.com/Aniketkhote/vaultify"
 
 environment:
