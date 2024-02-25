@@ -18,7 +18,7 @@ void main() async {
         .setMockMethodCallHandler(
       channel,
       (MethodCall? methodCall) async {
-        if (methodCall?.method == 'getApplicationDocumentsDirectory') {
+        if (methodCall?.method == 'getApplicationCacheDirectory') {
           return '.';
         }
         return null;
@@ -145,7 +145,7 @@ void main() async {
 
 Future<File> _fileDb(
     {bool isBackup = false, String fileName = 'Vaultify'}) async {
-  final dir = await getApplicationDocumentsDirectory();
+  final dir = await getApplicationCacheDirectory();
   final path = dir.path;
   final file =
       isBackup ? File('$path/$fileName.bak') : File('$path/$fileName.gs');

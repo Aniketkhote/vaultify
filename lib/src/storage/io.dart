@@ -180,7 +180,7 @@ class VaultifyImpl {
   /// Gets the directory for storing the file.
   Future<Directory> _getImplicitDir() async {
     try {
-      return await getApplicationDocumentsDirectory();
+      return await getApplicationCacheDirectory();
     } catch (err) {
       rethrow;
     }

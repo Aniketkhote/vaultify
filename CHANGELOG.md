@@ -1,3 +1,7 @@
+## 1.1.0
+
+- Changed storage location for cache from "Application Documents" to "Application Cache" directory.
+
 ## 1.0.2
 
 - Fixed pub points.
