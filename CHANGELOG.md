@@ -1,3 +1,7 @@
+## 1.1.1
+
+- Refreshed upgraded to 1.5.4
+
 ## 1.1.0
 
 - Changed storage location for cache from "Application Documents" to "Application Cache" directory.

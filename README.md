@@ -11,19 +11,6 @@ Vaultify is a versatile local storage solution designed for Flutter applications
 
 Vaultify simplifies local data storage, empowering Flutter developers to build robust applications with ease.
 
-## Getting Started
-
-To use Vaultify in your Flutter project, simply add it as a dependency in your `pubspec.yaml` file:
-
-```yaml
-dependencies:
-  vaultify: ^1.0.0
-```
-
-```dart
-import 'package:vaultify/vaultify.dart';
-```
-
 ## Example
 
 ```dart
