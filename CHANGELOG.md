@@ -1,3 +1,7 @@
+## 1.1.3
+
+- Refreshed upgraded to 2.0.1
+
 ## 1.1.1
 
 - Refreshed upgraded to 1.5.4
