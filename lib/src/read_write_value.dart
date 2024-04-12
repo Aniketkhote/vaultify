@@ -1,4 +1,4 @@
-import '../vaultify.dart';
+import "package:vaultify/vaultify.dart";
 
 /// A factory function type that produces instances of [Vaultify].
 typedef StorageFactory = Vaultify Function();
@@ -7,6 +7,14 @@ typedef StorageFactory = Vaultify Function();
 ///
 /// This class provides convenient access to read and write values from a storage container.
 class ReadWriteValue<T> {
+  /// Constructs a [ReadWriteValue] instance with the given [key], [defaultValue],
+  /// and optional [getBox] factory function.
+  ReadWriteValue(
+    this.key,
+    this.defaultValue, [
+    this.getBox,
+  ]);
+
   /// The key associated with the value.
   final String key;
 
@@ -15,14 +23,6 @@ class ReadWriteValue<T> {
 
   /// The factory function to obtain the storage container.
   final StorageFactory? getBox;
-
-  /// Constructs a [ReadWriteValue] instance with the given [key], [defaultValue],
-  /// and optional [getBox] factory function.
-  ReadWriteValue(
-    this.key,
-    this.defaultValue, [
-    this.getBox,
-  ]);
 
   /// Retrieves the current value associated with the [key].
   T get val => _getRealBox().read(key) ?? defaultValue;
@@ -45,7 +45,6 @@ extension Data<T> on T {
     String valueKey, {
     StorageFactory? getBox,
     T? defVal,
-  }) {
-    return ReadWriteValue(valueKey, defVal ?? this, getBox);
-  }
+  }) =>
+      ReadWriteValue(valueKey, defVal ?? this, getBox);
 }

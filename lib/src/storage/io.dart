@@ -1,12 +1,11 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'dart:typed_data';
+import "dart:async";
+import "dart:convert";
+import "dart:io";
+import "dart:typed_data";
 
-import 'package:path_provider/path_provider.dart';
-import 'package:refreshed/refreshed.dart';
-
-import '../value.dart';
+import "package:path_provider/path_provider.dart";
+import "package:refreshed/refreshed.dart";
+import "package:vaultify/src/value.dart";
 
 /// A class implementing data storage functionality using local file system
 /// storage and in-memory storage.
@@ -35,7 +34,7 @@ class VaultifyImpl {
   ///
   /// This method clears the in-memory storage and sets the subject's value to
   /// an empty map.
-  void clear() async {
+  Future<void> clear() async {
     subject
       ..value.clear()
       ..changeValue("", null);
@@ -46,9 +45,11 @@ class VaultifyImpl {
   /// This method deletes both the primary storage file and its backup file
   /// asynchronously.
   Future<void> deleteBox() async {
-    final box = await _fileDb(isBackup: false);
-    final backup = await _fileDb(isBackup: true);
-    await Future.wait([box.delete(), backup.delete()]);
+    final File box = await _fileDb(isBackup: false);
+    final File backup = await _fileDb(isBackup: true);
+    await Future.wait(
+      <Future<FileSystemEntity>>[box.delete(), backup.delete()],
+    );
   }
 
   /// Writes the current in-memory data to the storage file.
@@ -56,9 +57,9 @@ class VaultifyImpl {
   /// This method encodes the in-memory data as JSON and writes it to the
   /// storage file.
   Future<void> flush() async {
-    final buffer = utf8.encode(json.encode(subject.value));
-    final length = buffer.length;
-    RandomAccessFile file = await _getRandomFile();
+    final Uint8List buffer = utf8.encode(json.encode(subject.value));
+    final int length = buffer.length;
+    final RandomAccessFile file = await _getRandomFile();
 
     _randomAccessfile = await file.lock();
     _randomAccessfile = await _randomAccessfile!.setPosition(0);
@@ -74,7 +75,7 @@ class VaultifyImpl {
   /// separate backup file.
   void _madeBackup() {
     _getFile(true).then(
-      (value) async => await value.writeAsString(
+      (File value) async => await value.writeAsString(
         json.encode(subject.value),
         flush: true,
       ),
@@ -82,19 +83,13 @@ class VaultifyImpl {
   }
 
   /// Reads a value from the in-memory storage based on the given [key].
-  T? read<T>(String key) {
-    return subject.value[key] as T?;
-  }
+  T? read<T>(String key) => subject.value[key] as T?;
 
   /// Retrieves the keys of the in-memory storage.
-  T getKeys<T>() {
-    return subject.value.keys as T;
-  }
+  T getKeys<T>() => subject.value.keys as T;
 
   /// Retrieves the values of the in-memory storage.
-  T getValues<T>() {
-    return subject.value.values as T;
-  }
+  T getValues<T>() => subject.value.values as T;
 
   /// Initializes the storage.
   ///
@@ -104,7 +99,7 @@ class VaultifyImpl {
   Future<void> init([Map<String, dynamic>? initialData]) async {
     subject.value = initialData ?? <String, dynamic>{};
 
-    RandomAccessFile file = await _getRandomFile();
+    final RandomAccessFile file = await _getRandomFile();
     return file.lengthSync() == 0 ? flush() : _readFile();
   }
 
@@ -116,7 +111,7 @@ class VaultifyImpl {
   }
 
   /// Writes a value to the in-memory storage with the given [key].
-  void write(String key, dynamic value) {
+  void write(String key, value) {
     subject
       ..value[key] = value
       ..changeValue(key, value);
@@ -127,34 +122,37 @@ class VaultifyImpl {
     try {
       RandomAccessFile file = await _getRandomFile();
       file = await file.setPosition(0);
-      final buffer = Uint8List(await file.length());
+      final Uint8List buffer = Uint8List(await file.length());
       await file.readInto(buffer);
       subject.value = json.decode(utf8.decode(buffer));
     } catch (e) {
-      Get.log('Corrupted box, recovering backup file', isError: true);
-      final file = await _getFile(true);
+      Get.log("Corrupted box, recovering backup file", isError: true);
+      final File file = await _getFile(true);
 
-      final content = await file.readAsString()
+      final String content = await file.readAsString()
         ..trim();
 
       if (content.isEmpty) {
-        subject.value = {};
+        subject.value = <String, dynamic>{};
       } else {
         try {
-          subject.value = (json.decode(content) as Map<String, dynamic>?) ?? {};
+          subject.value = (json.decode(content) as Map<String, dynamic>?) ??
+              <String, dynamic>{};
         } catch (e) {
-          Get.log('Can not recover Corrupted box', isError: true);
-          subject.value = {};
+          Get.log("Can not recover Corrupted box", isError: true);
+          subject.value = <String, dynamic>{};
         }
       }
-      flush();
+      await flush();
     }
   }
 
   /// Gets a RandomAccessFile for file operations.
   Future<RandomAccessFile> _getRandomFile() async {
-    if (_randomAccessfile != null) return _randomAccessfile!;
-    final fileDb = await _getFile(false);
+    if (_randomAccessfile != null) {
+      return _randomAccessfile!;
+    }
+    final File fileDb = await _getFile(false);
     _randomAccessfile = await fileDb.open(mode: FileMode.append);
 
     return _randomAccessfile!;
@@ -162,7 +160,7 @@ class VaultifyImpl {
 
   /// Gets the file for storage operations.
   Future<File> _getFile(bool isBackup) async {
-    final fileDb = await _fileDb(isBackup: isBackup);
+    final File fileDb = await _fileDb(isBackup: isBackup);
     if (!fileDb.existsSync()) {
       fileDb.createSync(recursive: true);
     }
@@ -171,9 +169,9 @@ class VaultifyImpl {
 
   /// Gets the file path for storage operations.
   Future<File> _fileDb({required bool isBackup}) async {
-    final dir = await _getImplicitDir();
-    final getPath = await _getPath(isBackup, path ?? dir.path);
-    final file = File(getPath);
+    final Directory dir = await _getImplicitDir();
+    final String getPath = await _getPath(isBackup, path ?? dir.path);
+    final File file = File(getPath);
     return file;
   }
 
@@ -188,10 +186,10 @@ class VaultifyImpl {
 
   /// Gets the full file path based on the backup flag and the provided path.
   Future<String> _getPath(bool isBackup, String? path) async {
-    final isWindows = GetPlatform.isWindows;
-    final separator = isWindows ? '\\' : '/';
+    final bool isWindows = GetPlatform.isWindows;
+    final String separator = isWindows ? r"\" : "/";
     return isBackup
-        ? '$path$separator$fileName.bak'
-        : '$path$separator$fileName.gs';
+        ? "$path$separator$fileName.bak"
+        : "$path$separator$fileName.gs";
   }
 }

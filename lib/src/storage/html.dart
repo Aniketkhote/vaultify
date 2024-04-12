@@ -92,7 +92,8 @@ class VaultifyImpl {
 
   /// Reads the data from storage.
   Future<void> _readFromStorage() async {
-    final dataFromLocal = localStorage.entries.firstWhereOrNull(
+    final dataFromLocal = _firstWhereOrNull(
+      localStorage.entries,
       (value) {
         return value.key == fileName;
       },
@@ -105,23 +106,9 @@ class VaultifyImpl {
   }
 }
 
-/// Extension method on Iterable<T> to provide a similar functionality to
-/// [Iterable.firstWhere], but returns null if no element satisfies the
-/// condition.
-extension FirstWhereExt<T> on Iterable<T> {
-  /// Returns the first element that satisfies the given predicate [test],
-  /// or null if there are no elements that satisfy the predicate.
-  ///
-  /// Example:
-  /// ```dart
-  /// final numbers = [1, 2, 3, 4, 5];
-  /// final firstEven = numbers.firstWhereOrNull((element) => element.isEven);
-  /// print(firstEven); // Output: 2
-  /// ```
-  T? firstWhereOrNull(bool Function(T element) test) {
-    for (var element in this) {
-      if (test(element)) return element;
-    }
-    return null;
+_firstWhereOrNull(Iterable entries, bool Function(dynamic element) test) {
+  for (var element in entries) {
+    if (test(element)) return element;
   }
+  return null;
 }
