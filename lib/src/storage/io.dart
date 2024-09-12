@@ -178,7 +178,7 @@ class VaultifyImpl {
   /// Gets the directory for storing the file.
   Future<Directory> _getImplicitDir() async {
     try {
-      return await getApplicationCacheDirectory();
+      return await getApplicationDocumentsDirectory();
     } catch (err) {
       rethrow;
     }
@@ -190,6 +190,6 @@ class VaultifyImpl {
     final String separator = isWindows ? r"\" : "/";
     return isBackup
         ? "$path$separator$fileName.bak"
-        : "$path$separator$fileName.gs";
+        : "$path$separator$fileName.vault";
   }
 }

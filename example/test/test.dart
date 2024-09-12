@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vaultify/vaultify.dart';
 
 void main() {
-  final counter = 'counter';
-  final isDarkMode = 'isDarkMode';
+  const counter = 'counter';
+  const isDarkMode = 'isDarkMode';
   Vaultify box = Vaultify();
   test('GetStorage read and write operation', () {
     box.write(counter, 0);

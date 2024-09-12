@@ -1,3 +1,7 @@
+## 1.3.0
+
+- Bump version
+
 ## 1.2.0
 
 - Refreshed upgraded to 2.5.7

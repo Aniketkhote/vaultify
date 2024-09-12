@@ -4,7 +4,7 @@ import 'package:vaultify/vaultify.dart';
 
 void main() async {
   await Vaultify.init();
-  runApp(App());
+  runApp(const App());
 }
 
 class Controller extends GetxController {
@@ -15,6 +15,8 @@ class Controller extends GetxController {
 }
 
 class App extends StatelessWidget {
+  const App({super.key});
+
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(Controller());
@@ -22,11 +24,11 @@ class App extends StatelessWidget {
       return MaterialApp(
         theme: controller.theme,
         home: Scaffold(
-          appBar: AppBar(title: Text("Get Storage")),
+          appBar: AppBar(title: const Text("Get Storage")),
           body: Center(
             child: SwitchListTile(
               value: controller.isDark,
-              title: Text("Touch to change ThemeMode"),
+              title: const Text("Touch to change ThemeMode"),
               onChanged: controller.changeTheme,
             ),
           ),
