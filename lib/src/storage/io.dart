@@ -61,12 +61,19 @@ class VaultifyImpl {
     final int length = buffer.length;
     final RandomAccessFile file = await _getRandomFile();
 
-    _randomAccessfile = await file.lock();
-    _randomAccessfile = await _randomAccessfile!.setPosition(0);
-    _randomAccessfile = await _randomAccessfile!.writeFrom(buffer);
-    _randomAccessfile = await _randomAccessfile!.truncate(length);
-    _randomAccessfile = await file.unlock();
-    _madeBackup();
+    try {
+      // Lock, write and truncate file operations
+      _randomAccessfile = await file.lock();
+      await _randomAccessfile!.setPosition(0);
+      await _randomAccessfile!.writeFrom(buffer);
+      await _randomAccessfile!.truncate(length);
+      await _randomAccessfile!.flush();
+      await file.unlock();
+      _madeBackup();
+    } catch (e) {
+      // Error handling during file write operations
+      Get.log("Error during file flush: $e", isError: true);
+    }
   }
 
   /// Creates a backup of the current data.
@@ -75,10 +82,16 @@ class VaultifyImpl {
   /// separate backup file.
   void _madeBackup() {
     _getFile(true).then(
-      (File value) async => await value.writeAsString(
-        json.encode(subject.value),
-        flush: true,
-      ),
+      (File value) async {
+        try {
+          await value.writeAsString(
+            json.encode(subject.value),
+            flush: true,
+          );
+        } catch (e) {
+          Get.log("Error creating backup: $e", isError: true);
+        }
+      },
     );
   }
 
@@ -121,29 +134,31 @@ class VaultifyImpl {
   Future<void> _readFile() async {
     try {
       RandomAccessFile file = await _getRandomFile();
-      file = await file.setPosition(0);
+      await file.setPosition(0);
       final Uint8List buffer = Uint8List(await file.length());
       await file.readInto(buffer);
       subject.value = json.decode(utf8.decode(buffer));
     } catch (e) {
-      Get.log("Corrupted box, recovering backup file", isError: true);
+      Get.log("Error reading file: $e", isError: true);
+      await _recoverBackup();
+    }
+  }
+
+  /// Recovers from the backup file in case of an error while reading the main file.
+  Future<void> _recoverBackup() async {
+    try {
       final File file = await _getFile(true);
-
-      final String content = await file.readAsString()
-        ..trim();
-
-      if (content.isEmpty) {
+      final String content = await file.readAsString();
+      if (content.trim().isEmpty) {
         subject.value = <String, dynamic>{};
       } else {
-        try {
-          subject.value = (json.decode(content) as Map<String, dynamic>?) ??
-              <String, dynamic>{};
-        } catch (e) {
-          Get.log("Can not recover Corrupted box", isError: true);
-          subject.value = <String, dynamic>{};
-        }
+        subject.value = json.decode(content) as Map<String, dynamic>? ??
+            <String, dynamic>{};
       }
       await flush();
+    } catch (e) {
+      Get.log("Backup recovery failed: $e", isError: true);
+      subject.value = <String, dynamic>{};
     }
   }
 
@@ -162,7 +177,7 @@ class VaultifyImpl {
   Future<File> _getFile(bool isBackup) async {
     final File fileDb = await _fileDb(isBackup: isBackup);
     if (!fileDb.existsSync()) {
-      fileDb.createSync(recursive: true);
+      await fileDb.create(recursive: true);
     }
     return fileDb;
   }
@@ -171,8 +186,7 @@ class VaultifyImpl {
   Future<File> _fileDb({required bool isBackup}) async {
     final Directory dir = await _getImplicitDir();
     final String getPath = await _getPath(isBackup, path ?? dir.path);
-    final File file = File(getPath);
-    return file;
+    return File(getPath);
   }
 
   /// Gets the directory for storing the file.

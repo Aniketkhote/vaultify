@@ -1,3 +1,15 @@
+## 2.0.0
+
+# Breaking Change:
+
+- **Compatibility**: Now supports **Flutter 3.27+** and **Dart 3.6+**.
+
+- **Refactor**:
+  - Data is now saved/loaded as JSON.
+  - Removed platform-specific code for better cross-platform support.
+  - Immediate data persistence with `flush()`.
+  - Improved error handling and fallback for missing data.
+
 ## 1.3.1
 
 - Bump version
