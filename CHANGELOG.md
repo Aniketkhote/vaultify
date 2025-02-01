@@ -1,3 +1,7 @@
+## 2.0.1
+
+- **TypeError in `changeValue` method**: Reverted changes made in version 2.0.0 where generic types were introduced, causing a `TypeError` due to incorrect type handling. The method has now been modified to use `dynamic` to resolve the type mismatch and ensure compatibility with various data types.
+
 ## 2.0.0
 
 # Breaking Change:

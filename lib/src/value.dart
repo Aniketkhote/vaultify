@@ -28,9 +28,9 @@ class ValueStorage<T> extends Value<T> {
   ///
   /// This method will accumulate changes in the [changes] map instead of overwriting it,
   /// ensuring that the latest value for each key is tracked.
-  void changeValue(String key, T? value) {
+  void changeValue(String key, dynamic value) {
     // Add or update the value for the specified key in the changes map.
-    changes[key] = value;
+    changes = <String, dynamic>{key: value};
 
     // Refresh the stored value to reflect the latest changes.
     refresh();
